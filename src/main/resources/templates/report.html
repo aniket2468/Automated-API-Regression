@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title th:text="'API Guard · ' + ${run.suiteName}">Regression report</title>
+    <style>
+      :root {
+        font-family: system-ui, sans-serif;
+        color: #183249;
+        background: #f4f7fa;
+      }
+      body {
+        max-width: 1100px;
+        margin: 36px auto;
+        padding: 0 24px;
+      }
+      a {
+        color: #126b74;
+      }
+      h1 {
+        font-size: 32px;
+        letter-spacing: -1px;
+        margin: 12px 0;
+      }
+      h2 {
+        font-size: 20px;
+        margin-top: 30px;
+      }
+      .eyebrow {
+        color: #567080;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+      .meta {
+        color: #587083;
+        overflow-wrap: anywhere;
+      }
+      .metrics {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin: 24px 0;
+      }
+      .metric {
+        background: white;
+        border: 1px solid #dce5ec;
+        border-radius: 12px;
+        padding: 18px;
+        flex: 1;
+        min-width: 100px;
+      }
+      .metric strong {
+        font-size: 28px;
+        display: block;
+      }
+      .badge {
+        font-size: 12px;
+        font-weight: 700;
+        border-radius: 20px;
+        background: #e5edf3;
+        padding: 5px 10px;
+        white-space: nowrap;
+      }
+      .PASSED {
+        color: #137750;
+        background: #dff4e9;
+      }
+      .FAILED,
+      .ERROR,
+      .INTERRUPTED {
+        color: #a62d39;
+        background: #fbe7e9;
+      }
+      .SKIPPED {
+        color: #7b5c16;
+        background: #faf0d5;
+      }
+      article {
+        border: 1px solid #dce5ec;
+        border-radius: 12px;
+        padding: 20px;
+        background: white;
+        margin: 14px 0;
+      }
+      article h3 {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin: 0 0 12px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+      }
+      td,
+      th {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #e1e8ed;
+      }
+      code {
+        overflow-wrap: anywhere;
+      }
+      .fail {
+        color: #a62d39;
+      }
+      .pass {
+        color: #137750;
+      }
+      .note {
+        background: #fff4d8;
+        padding: 14px;
+        border-radius: 8px;
+      }
+      @media print {
+        body {
+          margin: 0;
+          background: white;
+        }
+        a {
+          color: inherit;
+        }
+        article {
+          break-inside: avoid;
+        }
+        .nav {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="nav" href="/">← Dashboard</a>
+    <p class="eyebrow">API Guard / execution report</p>
+    <h1 th:text="${run.suiteName}">Suite</h1>
+    <span
+      class="badge"
+      th:classappend="${run.status}"
+      th:text="${run.status}"
+    ></span>
+    <p class="meta">
+      <strong>Target:</strong> <span th:text="${run.baseUrl}"></span
+      ><br /><strong>Started:</strong> <span th:text="${run.createdAt}"></span
+      ><br /><strong>Finished:</strong>
+      <span
+        th:text="${run.finishedAt ?: 'Still running — refresh to update'}"
+      ></span
+      ><br /><strong>Specification:</strong>
+      <span th:text="${run.specId}"></span><br /><strong>Run:</strong>
+      <span th:text="${run.id}"></span>
+    </p>
+    <p class="note" th:if="${run.error}" th:text="${run.error}"></p>
+    <div class="metrics">
+      <div class="metric">Selected<strong th:text="${run.total}"></strong></div>
+      <div class="metric">Passed<strong th:text="${run.passed}"></strong></div>
+      <div class="metric">
+        Failed / errors<strong th:text="${run.failed}"></strong>
+      </div>
+      <div class="metric">
+        Skipped<strong th:text="${run.skipped}"></strong>
+      </div>
+    </div>
+    <p class="meta" th:if="${run.finishedAt == null}">
+      Counts are finalized when execution completes. Completed test results
+      appear below.
+    </p>
+    <h2>Test results</h2>
+    <p th:if="${results.isEmpty()}">No completed results yet.</p>
+    <article th:each="result : ${results}">
+      <h3>
+        <code th:text="${result.operation}"></code
+        ><span
+          class="badge"
+          th:classappend="${result.status}"
+          th:text="${result.status}"
+        ></span>
+      </h3>
+      <p class="meta">
+        <span th:text="${result.latencyMs}"></span> ms · HTTP
+        <span th:text="${result.actualStatus ?: '—'}"></span>
+      </p>
+      <p th:if="${result.error}" th:text="${result.error}"></p>
+      <table th:unless="${result.checks.isEmpty()}">
+        <thead>
+          <tr>
+            <th>Check</th>
+            <th>Result</th>
+            <th>Detail</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="check : ${result.checks}">
+            <td th:text="${check.name}"></td>
+            <td
+              th:class="${check.passed ? 'pass' : 'fail'}"
+              th:text="${check.passed ? 'PASS' : 'FAIL'}"
+            ></td>
+            <td th:text="${check.detail}"></td>
+          </tr>
+        </tbody>
+      </table>
+    </article>
+    <h2>Recent suite history</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Started</th>
+          <th>Status</th>
+          <th>Passed</th>
+          <th>Failed</th>
+          <th>Report</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="item : ${history}">
+          <td th:text="${item.createdAt}"></td>
+          <td th:text="${item.status}"></td>
+          <td th:text="${item.passed}"></td>
+          <td th:text="${item.failed}"></td>
+          <td><a th:href="@{/reports/{id}(id=${item.id})}">Open report</a></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="meta">
+      API Guard · Response bodies and request credentials are omitted from
+      execution reports.
+    </p>
+  </body>
+</html>

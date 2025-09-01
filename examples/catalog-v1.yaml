@@ -1,0 +1,82 @@
+openapi: 3.0.3
+info:
+  title: Catalog API
+  version: 1.0.0
+paths:
+  /products:
+    get:
+      operationId: listProducts
+      summary: List products
+      responses:
+        '200':
+          description: Product catalog
+          headers:
+            X-API-Version:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+    post:
+      operationId: createProduct
+      summary: Create a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              name: Mouse
+              price: 25
+            schema:
+              type: object
+              required: [name, price]
+              properties:
+                name:
+                  type: string
+                price:
+                  type: number
+      responses:
+        '201':
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+  /products/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        example: 1
+    get:
+      operationId: getProduct
+      summary: Get one product
+      responses:
+        '200':
+          description: Product found
+          headers:
+            X-API-Version:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+components:
+  schemas:
+    Product:
+      type: object
+      required: [id, name, price]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        price:
+          type: number
+          minimum: 0

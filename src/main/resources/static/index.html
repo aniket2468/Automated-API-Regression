@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>API Guard · Regression workspace</title>
+    <link rel="stylesheet" href="/app.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <aside>
+      <a class="brand" href="/">◈ <span>API Guard</span></a>
+      <p class="workspace">REGRESSION WORKSPACE</p>
+      <nav>
+        <a href="#overview" class="active">Overview</a
+        ><a href="#specifications">Specifications</a
+        ><a href="#suites">Test suites</a><a href="#changes">Change impact</a
+        ><a href="#history">Run history</a>
+      </nav>
+      <div class="sidebar-foot">
+        <span class="dot"></span> Local workspace<br /><small
+          >Contract confidence, continuously.</small
+        >
+      </div>
+    </aside>
+    <main>
+      <header>
+        <span>WORKSPACE / OVERVIEW</span
+        ><a href="/actuator/health" target="_blank" rel="noopener"
+          >Service health ↗</a
+        >
+      </header>
+      <section id="overview">
+        <p class="eyebrow">TEST WITH CONFIDENCE</p>
+        <h1>Your API. Under guard.</h1>
+        <p class="subtitle">
+          Turn specifications into regression tests. See what changed, what
+          failed, and what needs your attention.
+        </p>
+        <div id="stats" class="stats">
+          <div>Specifications<strong id="spec-count">0</strong></div>
+          <div>Test suites<strong id="suite-count">0</strong></div>
+          <div>Recent runs<strong id="run-count">0</strong></div>
+          <div>Pass rate · executed tests<strong id="pass-rate">—</strong></div>
+        </div>
+      </section>
+      <div id="notice" role="status" aria-live="polite" hidden></div>
+      <div class="grid">
+        <section class="card" id="specifications">
+          <div class="section-title">
+            <span class="step">01</span>
+            <h2>Import a specification</h2>
+          </div>
+          <p>
+            OpenAPI 3.0 JSON or YAML. Every import is a new, immutable version.
+          </p>
+          <form id="import-form">
+            <label for="spec-name">API name</label
+            ><input
+              id="spec-name"
+              required
+              maxlength="160"
+              placeholder="e.g. Orders API"
+            /><label for="spec-file">Specification file</label
+            ><input
+              id="spec-file"
+              type="file"
+              accept=".json,.yaml,.yml"
+              required
+            /><button type="submit">
+              Import specification <span>↗</span>
+            </button>
+          </form>
+          <div id="spec-list" class="items"></div>
+        </section>
+        <section class="card" id="suites">
+          <div class="section-title">
+            <span class="step">02</span>
+            <h2>Generate & run</h2>
+          </div>
+          <p>
+            Generate a suite, review its inputs, then run it against your API.
+          </p>
+          <form id="generate-form">
+            <label for="generate-spec">Specification version</label
+            ><select id="generate-spec" required></select
+            ><label for="suite-name">Suite name</label
+            ><input
+              id="suite-name"
+              required
+              maxlength="160"
+              placeholder="Core regression"
+            /><button type="submit" class="secondary">
+              Generate test suite
+            </button>
+          </form>
+          <hr />
+          <form id="run-form">
+            <label for="run-suite">Test suite</label
+            ><select id="run-suite" required></select
+            ><label for="base-url">Target base URL</label
+            ><input
+              id="base-url"
+              type="url"
+              required
+              value="http://localhost:8080/demo-api"
+            />
+            <div class="two">
+              <div>
+                <label for="parallelism">Parallel tests</label
+                ><input
+                  id="parallelism"
+                  type="number"
+                  min="1"
+                  max="8"
+                  value="4"
+                  required
+                />
+              </div>
+              <div>
+                <label for="timeout">Timeout (ms)</label
+                ><input
+                  id="timeout"
+                  type="number"
+                  min="100"
+                  max="120000"
+                  value="5000"
+                  required
+                />
+              </div>
+            </div>
+            <button type="submit">Run regression suite <span>→</span></button>
+          </form>
+          <button class="text-button" id="review-tests" type="button">
+            Review / configure tests ↓
+          </button>
+          <div id="test-list" class="items"></div>
+        </section>
+        <section class="card wide" id="changes">
+          <div class="section-title">
+            <span class="step">03</span>
+            <h2>Understand the impact</h2>
+            <span class="tag">SPECIFICATION DIFF</span>
+          </div>
+          <p>
+            Find changed operations and shared schemas, then rerun the affected
+            existing tests against your target.
+          </p>
+          <form id="compare-form">
+            <div class="three">
+              <div>
+                <label for="old-spec">Baseline version</label
+                ><select id="old-spec" required></select>
+              </div>
+              <div>
+                <label for="new-spec">Candidate version</label
+                ><select id="new-spec" required></select>
+              </div>
+              <div>
+                <label for="impact-suite">Baseline test suite</label
+                ><select id="impact-suite" required></select>
+              </div>
+            </div>
+            <button type="submit" class="secondary">Analyze changes</button>
+          </form>
+          <div id="impact-results"></div>
+        </section>
+      </div>
+      <section class="card history" id="history">
+        <div class="section-title">
+          <h2>Recent runs</h2>
+          <button id="refresh" class="text-button" type="button">
+            Refresh ↻
+          </button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Suite / started</th>
+                <th>Status</th>
+                <th>Passed</th>
+                <th>Failed</th>
+                <th>Skipped</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="run-list"></tbody>
+          </table>
+        </div>
+        <p class="hint">
+          The latest 50 runs are shown. Reports include assertion details and
+          suite history.
+        </p>
+      </section>
+      <footer>
+        API GUARD <span>Built for observable, repeatable API testing.</span>
+      </footer>
+    </main>
+    <dialog id="editor">
+      <form id="edit-form">
+        <h2>Configure test</h2>
+        <p id="edit-operation"></p>
+        <p class="hint">
+          Edit request inputs, expected header values, JSON pointer assertions,
+          and the latency budget. Credentials entered here are stored locally
+          with this suite.
+        </p>
+        <label for="config-json">Test configuration (JSON)</label>
+        <p id="edit-error" role="alert" hidden></p>
+        <textarea
+          id="config-json"
+          rows="20"
+          spellcheck="false"
+          required
+        ></textarea>
+        <div class="two">
+          <button type="button" id="close-editor" class="secondary">
+            Cancel</button
+          ><button type="submit">Save configuration</button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>
