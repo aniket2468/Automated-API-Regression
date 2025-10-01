@@ -1,0 +1,18 @@
+services:
+  api-guard:
+    build: .
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: demo
+      API_ALLOWED_HOSTS: localhost,127.0.0.1,host.docker.internal
+    volumes:
+      - api-guard-data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+volumes:
+  api-guard-data:
