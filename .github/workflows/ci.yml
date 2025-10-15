@@ -1,0 +1,34 @@
+name: Build and regression tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Verify
+        run: bash ./mvnw -B -ntp verify
+      - name: Upload test and coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verification-reports
+          path: |
+            target/surefire-reports/
+            target/site/jacoco/
+      - name: Upload application
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-guard-jar
+          path: target/api-regression-platform-*.jar
